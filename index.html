@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invitación</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      overflow-x: hidden;
+      background-color: #395070;
+    }
+
+    :root{
+      --bg1:#0f172a;
+      --bg2:#1e293b;
+      --accent:#38bdf8;
+      --accent2:#a78bfa;
+      --card:#0b1224cc;
+      --text:#e5e7eb;
+      --muted:#94a3b8;
+      --highlight:#ffffff;
+      --shadow: 0 20px 40px rgba(0,0,0,.35);
+      --radius: 14px;
+    }
+
+    .pantalla {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #pagina2 {
+      display: none; /* Oculta la página2 al inicio */
+    }
+
+    .container-inicio {
+      position: relative;
+      width: 100%;
+      /*max-width: 600px;  /* Para que no se deforme en pantallas grandes */
+      margin: auto;
+    }
+
+    .container-inicio img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .btn-inicio {
+      position: absolute;
+      top: 77.5%;       /* ← calculado en proporción */
+      left: 50%;
+      transform: translateX(-50%);
+      width: 50%;       /* también en porcentaje para adaptarse al tamaño */
+      padding: 12px 0;
+      text-align: center;
+
+      background: #ffffff00;
+      color: #ffffff00;
+      font-weight: bold;
+      font-size: 1.2rem;
+      border-radius: 10px;
+      text-decoration: none;
+
+      /* border: 2px dashed red; 🔴 quitar cuando esté listo */
+    }
+
+    /* VIDEO */
+    .video-container {
+      position: relative;
+      width: 100%;
+      height: 100vh; /* altura completa de pantalla */
+      overflow: hidden;
+    }
+
+    .video-container video {
+      position: relative;
+      top: 50%;
+      left: 50%;
+      min-width: 100%;
+      height: 100%;
+      transform: translate(-50%, -50%);
+      object-fit: cover;
+      z-index: 0;
+    }
+
+    /* CONTENIDO SOBRE EL VIDEO */
+    .video-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      text-align: center;
+      color: white;
+      z-index: 1;
+      background: rgba(0, 0, 0, 0.3); /* oscurece un poco para que se lea mejor el texto */
+    }
+
+    .deslizar-container img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    .card{
+      /* background: var(--card); */
+      /* -webkit-backdrop-filter: blur(5px); */
+      /* backdrop-filter: blur(5px); */
+      border:1px solid rgba(255,255,255,.08);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+      /* padding: clamp(16px, 3vw, 28px); */
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: clamp(10px, 2.5vw, 18px);
+    }
+
+    .unit{
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.08);
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      padding:10px;
+      text-align:center;
+      transition:.2s;
+    }
+    .unit:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.18);}
+    .label{font-size:11px;color:var(--text);text-transform:uppercase;}
+    .value{display:block;font-weight:600;font-size:clamp(25px,4vw,55px);margin-top:6px;}
+
+    .progress{margin-top:16px;height:8px;border-radius:999px;background:rgba(255,255,255,.08);}
+    .bar{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .8s ease;}
+
+    .foot{text-align:center;color:var(--muted);font-size:14px;margin-top:14px;}
+    .done{text-align:center;padding:20px;font-size:clamp(18px,3vw,24px);color:#eafffb;font-weight:700;}
+
+    @media (max-width:640px){.grid{grid-template-columns: repeat(4, 1fr);}}
+
+
+
+    .image-container {
+      position: relative;
+      display: inline-block;
+      width: 100%; /* se ajusta a la pantalla */
+    }
+
+    .image-container img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .hotspot {
+      position: absolute;
+      top: 50%;   /* porcentaje calculado */
+      left: 50%;  /* porcentaje calculado */
+      transform: translate(-50%, -50%); /* centra el botón */
+      width: 200px;
+      height: 50px;
+      background: rgba(255, 0, 0, 0); /* para ver el área del botón */
+      border-radius: 8px;
+      text-align: center;
+      line-height: 40px;
+      color: #ffffff00;
+      text-decoration: none;
+    }
+
+      #audio-controls {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 10;
+    }
+
+    #audio-toggle {
+      background: rgba(0,0,0,0.6);
+      border: none;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #audio-toggle svg {
+      width: 30px;
+      height: 30px;
+      fill: white;
+    }
+
+    /* Animaciones */
+    .fade-in-up {
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 5s ease, transform 2s ease;
+    }
+
+    .fade-in-up.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .fade-in-down {
+      opacity: 0;
+      transform: translateY(-30px);
+      transition: opacity 1s ease, transform 1s ease;
+    }
+
+    .fade-in-down.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Imagen con efecto zoom */
+    .imagen-zoom {
+      position: absolute;
+      top: 10%;
+      /* left: 50%; */
+      transform: translate(-50%, -50%);
+      width: 40%; /* ajusta al tamaño que quieras */
+      animation: zoomInOut 8s ease-in-out infinite;
+    }
+
+    @keyframes zoomInOut {
+      0% { transform: translate(-50%, -50%) scale(0.3); }
+      50% { transform: translate(-50%, -50%) scale(1); }
+      /* 100% { transform: translate(-50%, -50%) scale(0.5); } */
+    }
+
+    .misquince-container img {
+      margin-top: 10px;
+      width: 15%;
+      height: auto;
+      display: block;
+    }
+
+    @media (max-width:640px){.misquince-container img{width: 40%;}}
+
+  </style>
+</head>
+<body>
+
+  <div id="pagina1" class="pantalla">
+    <div class="container-inicio">
+      <img src="assets/inicio.png" alt="Invitación Abigail">
+      <a onclick="mostrarinvitacion()" class="btn-inicio">INGRESAR</a>
+    </div>
+  </div>
+
+  <div id="pagina2" class="pantalla"> 
+    <!-- Video a pantalla completa -->
+    <div class="video-container">
+      <video autoplay muted loop playsinline>
+        <source src="assets/video.mp4" type="video/mp4">
+      </video>
+
+      <!-- Contenido encima del video -->
+      <div class="video-overlay">
+        <div class="misquince-container">
+          <img src="assets/mis quince.png" alt=""   class="imagen-zoom">
+        </div>
+        <div>
+          <p>FALTAN</p>
+          <section class="card">
+            <div class="grid" id="countdown">
+              <div class="unit"><span class="label">Días</span><span class="value" id="days">--</span></div>
+              <div class="unit"><span class="label">Horas</span><span class="value" id="hours">--</span></div>
+              <div class="unit"><span class="label">Minutos</span><span class="value" id="minutes">--</span></div>
+              <div class="unit"><span class="label">Segundos</span><span class="value" id="seconds">--</span></div>
+            </div>
+
+            <div class="progress"><div class="bar" id="bar"></div></div>
+            <div class="foot" id="foot"></div>
+            <div class="done" id="done" hidden>🎉 ¡Llegó el momento! 🎉</div>
+          </section>
+        </div>
+        <div class="deslizar-container">
+          <img src="assets/delizar.png" alt="" width="20%"  class="fade-in-up">
+        </div>
+        
+      </div>
+    </div>
+
+    <!-- Audio de fondo -->
+    <audio id="bg-music" autoplay loop muted>
+      <source src="assets/musica.mp3" type="audio/mpeg" >
+      Tu navegador no soporta el audio.
+    </audio>
+
+    <!-- Botón de control de audio -->
+    <div id="audio-controls">
+      <button id="audio-toggle">
+        <!-- Icono Play (SVG) -->
+        <svg id="play-icon" viewBox="0 0 24 24">
+          <path d="M8 5v14l11-7z"></path>
+        </svg>
+        <!-- Icono Stop/Pause (SVG) oculto -->
+        <svg id="pause-icon" viewBox="0 0 24 24" style="display: none;">
+          <path d="M6 19h4V5H6zm8-14v14h4V5h-4z"></path>
+        </svg>
+      </button>
+    </div>
+
+    <div class="image-container">
+      <img src="assets/parte 1.png" alt="Imagen 1">
+    </div>
+
+    <div class="image-container">
+      <img src="assets/parte 2.png" alt="Imagen 2">
+    </div>
+
+
+    <div class="image-container">
+      <img src="assets/parte3.png" alt="Imagen 3">
+      <a href="https://maps.app.goo.gl/BLsueG77DXd8C9yJA" class="hotspot" style="top:32.5%; left:50%;" target="_blank">Ubicación</a>
+      <a href="https://api.whatsapp.com/send?phone=51942402274&text=Hola%20Abigail,%20gracias%20por%20la%20invitación%20a%20tus%2015%20años%2C%20confirmo%20mi%20asistencia.%20Mi%20nombre%20y%20apellido%20es%3A%20" class="hotspot" style="top:59%; left:50%;" target="_blank">Confirmar</a>
+    </div>
+
+    <div class="image-container">
+      <img src="assets/parte 4.png" alt="Imagen 4">
+    </div>
+
+    <div class="image-container">
+      <img src="assets/parte 5.png" alt="Imagen 5 ">
+    </div>
+  </div>
+
+  <script>
+    function mostrarinvitacion() {
+      document.getElementById("pagina1").style.display = "none"; 
+      document.getElementById("pagina2").style.display = "block"; 
+
+      // Reproducir música
+      const audio = document.getElementById("miAudio");
+      audio.play();
+    }
+
+    const target = new Date('2025-09-13T20:30:00-05:00');
+    const startedAt = new Date();
+
+    const el = {
+      d: document.getElementById('days'),
+      h: document.getElementById('hours'),
+      m: document.getElementById('minutes'),
+      s: document.getElementById('seconds'),
+      bar: document.getElementById('bar'),
+      foot: document.getElementById('foot'),
+      done: document.getElementById('done'),
+      sound: document.getElementById('sound')
+    };
+
+    const pad2 = n => String(n).padStart(2, '0');
+
+    function formatDiff(ms){
+      const totalSeconds = Math.max(0, Math.floor(ms/1000));
+      const days = Math.floor(totalSeconds/86400);
+      const hours = Math.floor((totalSeconds%86400)/3600);
+      const minutes = Math.floor((totalSeconds%3600)/60);
+      const seconds = totalSeconds%60;
+      return {days, hours, minutes, seconds};
+    }
+
+    function launchConfetti(){
+      const duration = 5 * 1000;
+      const end = Date.now() + duration;
+
+      (function frame(){
+        confetti({particleCount:5, spread:70, origin:{y:0.6}});
+        if (Date.now() < end) requestAnimationFrame(frame);
+      })();
+    }
+
+    function update(){
+      const now = new Date();
+      const diff = target - now;
+
+      if (diff <= 0){
+        el.d.textContent = el.h.textContent = el.m.textContent = el.s.textContent = "00";
+        el.foot.textContent = "¡El momento ha llegado!";
+        el.done.hidden = false;
+        el.bar.style.width = "100%";
+        clearInterval(timer);
+        launchConfetti();
+        el.sound.play().catch(()=>{}); // reproduce sonido
+        return;
+      }
+
+      const {days, hours, minutes, seconds} = formatDiff(diff);
+      el.d.textContent = pad2(days);
+      el.h.textContent = pad2(hours);
+      el.m.textContent = pad2(minutes);
+      el.s.textContent = pad2(seconds);
+
+      // el.foot.textContent = `Faltan ${days}d ${hours}h ${minutes}m ${seconds}s`;
+
+      const totalSpan = target - startedAt;
+      const elapsed = now - startedAt;
+      el.bar.style.width = Math.min(100,(elapsed/totalSpan)*100)+"%";
+    }
+
+    update();
+    const timer = setInterval(update,1000);
+
+    const audio = document.getElementById("bg-music");
+    const toggleBtn = document.getElementById("audio-toggle");
+    const playIcon = document.getElementById("play-icon");
+    const pauseIcon = document.getElementById("pause-icon");
+
+      // Estado visual inicial: audio está en autoplay pero muteado.
+    // Dejamos icono de "play" hasta que el usuario active el sonido.
+    playIcon.style.display = "block";
+    pauseIcon.style.display = "none";
+
+    // Función que "desbloquea" el audio (quita mute y reproduce con volumen)
+  function unlockAudio() {
+    // quitar el mute y poner un volumen razonable
+    audio.muted = false;
+    audio.volume = 0.65; // ajusta el volumen inicial si quieres
+    // intentar reproducir (la promesa puede fallar si el navegador lo impide)
+    audio.play().then(() => {
+      // éxito: actualizar iconos a "pause"
+      playIcon.style.display = "none";
+      pauseIcon.style.display = "block";
+    }).catch((err) => {
+      // si falla, seguimos mostrando play (no es crítico)
+      console.warn("No se pudo reproducir el audio tras la interacción:", err);
+    });
+  }
+
+    // Listeners confiables para "primer gesto"
+  document.addEventListener("click", unlockAudio, { once: true });
+  document.addEventListener("touchstart", unlockAudio, { once: true });
+  document.addEventListener("keydown", unlockAudio, { once: true });
+
+  // Comportamiento del botón toggle (Play / Pause)
+  toggleBtn.addEventListener("click", () => {
+    if (audio.paused) {
+      // Si está pausado, aseguramos estar sin mute y reproducimos
+      audio.muted = false;
+      audio.volume = 0.65;
+      audio.play().catch(()=>{ /* ignorar errores menores */ });
+      playIcon.style.display = "none";
+      pauseIcon.style.display = "block";
+    } else {
+      // Si está reproduciéndose, pausamos (no mutear)
+      audio.pause();
+      playIcon.style.display = "block";
+      pauseIcon.style.display = "none";
+    }
+  });
+
+
+  const animElements = document.querySelectorAll(".fade-in-up, .fade-in-down");
+
+  const observer2 = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("show");
+      }
+    });
+  }, { threshold: 0.2 });
+
+  animElements.forEach(el => observer2.observe(el));
+</script>   
+
+</body>
+</html>
